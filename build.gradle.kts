@@ -52,11 +52,17 @@ kotlin {
 
 // --- Configuration des Tests Junit ---
 tasks.withType<Test> {
-	useJUnitPlatform()
-	// On force l'utilisation du moteur Kotest pour éviter que Jupiter ne s'en mêle seul
+	useJUnitPlatform {
+		// Force l'utilisation du moteur Kotest
+		includeEngines("kotest")
+	}
+
 	systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+
 	testLogging {
 		events("passed", "skipped", "failed")
+		showExceptions = true
+		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 	}
 }
 // --- Étape 6/7 : Couverture de code (JaCoCo) ---
@@ -70,9 +76,17 @@ tasks.jacocoTestReport {
 
 // --- Étape 7/7 : Tests de mutation (PITest) ---
 pitest {
-	targetClasses.set(listOf("livres.domain.*")) // Cible ton code métier uniquement
-	testPlugin.set("junit5")                     // Utilise JUnit 5 pour Kotest
-	outputFormats.set(listOf("XML", "HTML"))
-	timestampedReports.set(false)                // Évite de créer un dossier différent à chaque run
-	mutationThreshold.set(0)                     // N'échoue pas le build si des mutants survivent (pour voir le rapport)
+	// On cible le package racine de ton domaine
+	targetClasses.set(listOf("livres.domain.*"))
+
+	// On aide PIT à trouver les tests au bon endroit
+	targetTests.set(listOf("livres.domain.usecase.*"))
+
+	testPlugin.set("junit5")
+	outputFormats.set(listOf("HTML", "XML"))
+	pitestVersion.set("1.16.0")
+	timestampedReports.set(false)
+
+	// Force l'activation du moteur Kotest pour PIT
+	jvmArgs.set(listOf("-Djunit.jupiter.extensions.autodetection.enabled=true"))
 }
