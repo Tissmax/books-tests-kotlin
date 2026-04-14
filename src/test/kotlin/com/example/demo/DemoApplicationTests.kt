@@ -8,7 +8,7 @@ import io.kotest.matchers.shouldBe
 class Test : FunSpec({
 
 	test("Test A doit retourner B") {
-		cesar(message = "A", decallage = 1) Hello Quelqu'un a les vraies dates pour le passage de 2027 ? shouldBe "B"
+		cesar(message = "A", decallage = 1) shouldBe "B"
 	}
 
 	test("Test A doit retourner C") {

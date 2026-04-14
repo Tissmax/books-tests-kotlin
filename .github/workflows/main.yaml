@@ -1,0 +1,38 @@
+name: Java/Kotlin CI with Kotest
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupérer le code du dépôt
+      - uses: actions/checkout@v4
+
+      # 2. Installer Java 21 (comme dans ton build.gradle.kts)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. Donner les droits d'exécution au script Gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Compiler et lancer les tests
+      - name: Build and Test with Gradle
+        run: ./gradlew build
+
+      # 5. Publier les résultats des tests (Plugin demandé dans le TP)
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() # On publie même si les tests échouent pour voir pourquoi
+        with:
+          files: "**/build/test-results/**/*.xml"
