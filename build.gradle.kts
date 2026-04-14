@@ -41,6 +41,7 @@ dependencies {
 
 	// FORCE le launcher pour Gradle 9
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 // --- Configuration Kotlin ---
 kotlin {
@@ -54,6 +55,9 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 	// On force l'utilisation du moteur Kotest pour éviter que Jupiter ne s'en mêle seul
 	systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+	testLogging {
+		events("passed", "skipped", "failed")
+	}
 }
 // --- Étape 6/7 : Couverture de code (JaCoCo) ---
 tasks.jacocoTestReport {
