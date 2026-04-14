@@ -29,20 +29,19 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation(kotlin("stdlib-jdk8"))
 
-	// --- Unit Testing (Kotest & MockK) ---
-	testImplementation("org.springframework.boot:spring-boot-starter-test") {
-		// On exclut JUnit Vintage pour éviter les conflits avec Kotest/JUnit 5
-		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-	}
+	// --- Testing ---
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+	// Kotest : On s'assure d'avoir le moteur Junit5 de Kotest
 	testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
 	testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 	testImplementation("io.kotest:kotest-property:5.9.1")
+
 	testImplementation("io.mockk:mockk:1.13.8")
 
-	// --- JUnit 5 Platform (Géré par Spring, on ne force que le launcher) ---
+	// FORCE le launcher pour Gradle 9
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
-
 // --- Configuration Kotlin ---
 kotlin {
 	compilerOptions {
@@ -53,11 +52,9 @@ kotlin {
 // --- Configuration des Tests Junit ---
 tasks.withType<Test> {
 	useJUnitPlatform()
-	testLogging {
-		events("passed", "skipped", "failed")
-	}
+	// On force l'utilisation du moteur Kotest pour éviter que Jupiter ne s'en mêle seul
+	systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
 }
-
 // --- Étape 6/7 : Couverture de code (JaCoCo) ---
 tasks.jacocoTestReport {
 	dependsOn(tasks.test) // On génère le rapport seulement après les tests
