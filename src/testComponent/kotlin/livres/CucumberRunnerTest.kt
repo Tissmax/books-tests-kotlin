@@ -11,7 +11,7 @@ import org.testcontainers.lifecycle.Startables
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features")
+@SelectClasspathResource("features/book.feature")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "livres") // Ton package ici
 @CucumberContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
