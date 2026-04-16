@@ -1,0 +1,19 @@
+build:
+  maxIssues: 10
+  excludeCorrectable: false
+  weights:
+  # On peut pondérer les erreurs ici
+
+complexity:
+  active: true
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+  LongMethod:
+    active: true
+    threshold: 60
+
+style:
+  active: true
+  MagicNumber:
+    active: false # On désactive ça, c'est souvent pénible en test
