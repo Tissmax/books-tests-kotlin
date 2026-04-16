@@ -1,5 +1,6 @@
 package livres
 
+import com.example.demo.DemoApplication
 import io.cucumber.java.Before
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
@@ -11,18 +12,20 @@ import io.restassured.response.ValidatableResponse
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import io.kotest.matchers.shouldBe
-import io.restassured.path.json.JsonPath
+import io.kotest.matchers.shouldNotBe
 
 @CucumberContextConfiguration
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class BookStepDefs {
+@SpringBootTest(
+    classes = [DemoApplication::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+class BookStepDefs { // <-- LE NOM DOIT ÊTRE BookStepDefs
 
     @LocalServerPort
     private var port: Int = 0
 
     private lateinit var lastResponse: ValidatableResponse
 
-    // Helper pour construire l'URL avec le port dynamique injecté par Spring
     private fun url(path: String) = "http://localhost:$port$path"
 
     @Before
@@ -36,7 +39,7 @@ class BookStepDefs {
             .contentType(ContentType.JSON)
             .body("""{"titre": "$titre", "auteur": "$auteur"}""")
             .`when`()
-            .post(url("/books")) // Utilisation de l'URL complète
+            .post(url("/books"))
             .then()
             .statusCode(201)
     }
@@ -55,14 +58,13 @@ class BookStepDefs {
         val expectedTitre = payload[0]["titre"]
         val expectedAuteur = payload[0]["auteur"]
 
-        val body = lastResponse.extract().body().asString()
+        val books: List<Map<String, String>> = lastResponse.extract().body().jsonPath().getList("")
 
-        // On utilise une recherche (find) pour être sûr de trouver le livre même si l'ordre change
-        val jsonPath = JsonPath(body)
-        val titreTrouve = jsonPath.getString("find { it.titre == '$expectedTitre' }.titre")
-        val auteurTrouve = jsonPath.getString("find { it.titre == '$expectedTitre' }.auteur")
+        // On cherche manuellement dans la liste pour éviter les erreurs de syntaxe JsonPath
+        val livreTrouve = books.find { it["titre"] == expectedTitre }
 
-        titreTrouve shouldBe expectedTitre
-        auteurTrouve shouldBe expectedAuteur
+        livreTrouve shouldNotBe null
+        livreTrouve!!["titre"] shouldBe expectedTitre
+        livreTrouve["auteur"] shouldBe expectedAuteur
     }
 }
