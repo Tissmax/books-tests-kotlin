@@ -1,7 +1,6 @@
 package livres
 
 import io.cucumber.java.Before
-import io.cucumber.java.Scenario
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -21,8 +20,10 @@ class BookStepDefs {
     private lateinit var lastResponse: ValidatableResponse
 
     @Before
-    fun setup(scenario: Scenario) {
-        RestAssured.baseURI = "http://localhost:$port"
+    fun setup() {
+        // On configure les propriétés statiques séparément
+        RestAssured.baseURI = "http://localhost"
+        RestAssured.port = port
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails()
     }
 
@@ -32,7 +33,7 @@ class BookStepDefs {
             .contentType(ContentType.JSON)
             .body("""{"titre": "$titre", "auteur": "$auteur"}""")
             .`when`()
-            .post("/books")
+            .post("/books") // RestAssured utilisera baseURI + port + /books
             .then()
             .statusCode(201)
     }
@@ -52,7 +53,8 @@ class BookStepDefs {
         val expectedAuteur = payload[0]["auteur"]
 
         val body = lastResponse.extract().body().asString()
-        JsonPath(body).getString("[0].titre") shouldBe expectedTitre
-        JsonPath(body).getString("[0].auteur") shouldBe expectedAuteur
+        // Utilisation de GPath pour chercher dans la liste si le livre existe
+        JsonPath(body).getString("find { it.titre == '$expectedTitre' }.titre") shouldBe expectedTitre
+        JsonPath(body).getString("find { it.titre == '$expectedTitre' }.auteur") shouldBe expectedAuteur
     }
 }
