@@ -54,35 +54,42 @@ repositories {
 
 // --- 2. DÉPENDANCES ---
 dependencies {
+	// --- APP ---
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.postgresql:postgresql")
 	implementation("org.liquibase:liquibase-core")
 
-	// TESTS UNITAIRES (Base pour tous les autres)
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-	testImplementation("io.kotest:kotest-assertions-core:5.9.1")
-	testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
-	testImplementation("io.mockk:mockk:1.13.10")
+	// --- TOUS LES TESTS (On utilise une liste pour ne rien oublier) ---
+	val testLib = listOf(
+		"org.springframework.boot:spring-boot-starter-test",
+		"io.kotest:kotest-runner-junit5:5.9.1",
+		"io.kotest:kotest-assertions-core:5.9.1",
+		"io.kotest.extensions:kotest-extensions-spring:1.1.3",
+		"io.mockk:mockk:1.13.10"
+	)
 
-	// TESTS D'INTÉGRATION
+	// On applique ces libs à TOUTES les sources de test
+	testLib.forEach {
+		testImplementation(it)
+		"testIntegrationImplementation"(it)
+		"testComponentImplementation"(it)
+		"testArchitectureImplementation"(it)
+	}
+
+	// --- SPECIFIQUES ---
 	"testIntegrationImplementation"("org.testcontainers:postgresql:1.19.1")
 	"testIntegrationImplementation"("com.ninja-squad:springmockk:4.0.2")
 
-	// TESTS DE COMPOSANTS
 	val cucumberVersion = "7.14.0"
 	"testComponentImplementation"("io.cucumber:cucumber-java:$cucumberVersion")
 	"testComponentImplementation"("io.cucumber:cucumber-spring:$cucumberVersion")
 	"testComponentImplementation"("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
 	"testComponentImplementation"("io.rest-assured:rest-assured:5.3.2")
-	"testComponentImplementation"("org.junit.platform:junit-platform-suite:1.10.0")
 
-	// ARCHITECTURE
 	"testArchitectureImplementation"("com.tngtech.archunit:archunit-junit5:1.0.1")
 }
-
 // --- 3. TÂCHES DE TEST ---
 tasks.withType<Test> {
 	useJUnitPlatform()
