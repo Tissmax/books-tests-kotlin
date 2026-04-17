@@ -72,16 +72,21 @@ class BookManagerTest : FunSpec({
     }
 
     test("La réservation d'un livre non réservé doit mettre à jour le statut et sauvegarder") {
-        // 1. Arrange : On crée une instance propre
-        val book = Book("L'Étranger", "Camus", false)
-        every { repository.updateBook(any()) } answers { firstArg() }
+        // 1. Arrange
+        val title = "L'Étranger"
+        val updatedBook = Book(title, "Camus", true) // On prépare l'objet attendu
+
+        // On simule le comportement du repo de manière statique
+        every { repository.updateBook(any()) } returns updatedBook
+        // Il faut aussi mocker la recherche du livre si ton Use Case fait un findByTitle !
+        every { repository.getBookByTitle(title) } returns Book(title, "Camus", false)
 
         // 2. Act
-        val result = useCase.reserveBook(book.title)
+        val result = useCase.reserveBook(title)
 
         // 3. Assert
         result.reserved shouldBe true
-        verify(exactly = 1) { repository.updateBook(any()) }
+        verify(exactly = 1) { repository.updateBook(match { it.reserved == true }) }
     }
 
     test("Réserver un livre déjà réservé ne doit pas appeler le repository") {
