@@ -1,0 +1,62 @@
+name: Java/Kotlin CI with Kotest
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  issues: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # Étape 1 : Linter (Si ça rate ici, on ne lance pas le reste pour économiser du temps)
+      - name: Run Linter (Detekt)
+        run: ./gradlew detektCheck
+
+      # Étape 2 : On lance les tests (Architecture + Unit + Integration + Component)
+      # On regroupe tout ici avec --continue pour que Gradle tente de tout lancer
+      # même si une suite de tests échoue.
+      - name: Run All Tests
+        run: ./gradlew testArchitecture test testIntegration testComponent --continue
+
+      # Étape 3 : Publication du tableau de résultats
+      # On utilise un pattern plus global pour ramasser tous les rapports XML générés
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: "**/build/test-results/**/*.xml"
+          check_name: "📊 Rapport détaillé des Tests"
+          comment_title: "Bilan des tests (Unit, Intégration, Architecture, Composants)"
