@@ -14,7 +14,7 @@ L'application est découpée en trois couches distinctes pour garantir la mainte
 Stratégie de Validation et Qualité
 1. Tests Unitaires et Logique Métier
 
-La logique de gestion des livres a été testée en isolant le domaine grâce à MockK.
+La logique de gestion des books a été testée en isolant le domaine grâce à MockK.
 
     Property-Based Testing : Au lieu de tester des cas statiques, j'ai utilisé Kotest Property pour générer des jeux de données aléatoires. Cela permet de garantir que l'algorithme de tri reste fiable, quelles que soient les chaînes de caractères (titres ou auteurs) envoyées.
 

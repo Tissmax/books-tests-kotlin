@@ -16,10 +16,13 @@
             <column name="id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="titre" type="varchar(255)">
+            <column name="title" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="auteur" type="varchar(255)">
+            <column name="author" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reserved" type="boolean">
                 <constraints nullable="false"/>
             </column>
         </createTable>
